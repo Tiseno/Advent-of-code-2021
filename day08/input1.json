@@ -1,1 +1,12 @@
-[16,1,2,0,4,2,7,1,2,14]
+[
+{"patterns":["be","cfbegad","cbdgef","fgaecd","cgeb","fdcge","agebfd","fecdb","fabcd","edb"],"numbers":["fdgacbe","cefdb","cefbgd","gcbe"]},
+{"patterns":["edbfga","begcd","cbg","gc","gcadebf","fbgde","acbgfd","abcde","gfcbed","gfec"],"numbers":["fcgedb","cgb","dgebacf","gc"]},
+{"patterns":["fgaebd","cg","bdaec","gdafb","agbcfd","gdcbef","bgcad","gfac","gcb","cdgabef"],"numbers":["cg","cg","fdcagb","cbg"]},
+{"patterns":["fbegcd","cbd","adcefb","dageb","afcb","bc","aefdc","ecdab","fgdeca","fcdbega"],"numbers":["efabcd","cedba","gadfec","cb"]},
+{"patterns":["aecbfdg","fbg","gf","bafeg","dbefa","fcge","gcbea","fcaegb","dgceab","fcbdga"],"numbers":["gecf","egdcabf","bgf","bfgea"]},
+{"patterns":["fgeab","ca","afcebg","bdacfeg","cfaedg","gcfdb","baec","bfadeg","bafgc","acf"],"numbers":["gebdcfa","ecba","ca","fadegcb"]},
+{"patterns":["dbcfg","fgd","bdegcaf","fgec","aegbdf","ecdfab","fbedc","dacgb","gdcebf","gf"],"numbers":["cefg","dcbef","fcge","gbcadfe"]},
+{"patterns":["bdfegc","cbegaf","gecbf","dfcage","bdacg","ed","bedf","ced","adcbefg","gebcd"],"numbers":["ed","bcgafe","cdgba","cbgef"]},
+{"patterns":["egadfb","cdbfeg","cegd","fecab","cgb","gbdefca","cg","fgcdab","egfdb","bfceg"],"numbers":["gbdfcae","bgc","cg","cgb"]},
+{"patterns":["gcafb","gcf","dcaebfg","ecagb","gf","abcdeg","gaef","cafbge","fdbac","fegbdc"],"numbers":["fgae","cfgab","fg","bagce"]}
+]
