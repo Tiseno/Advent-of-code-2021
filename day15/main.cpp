@@ -4,7 +4,6 @@
 #include <queue>
 #include <set>
 #include <unordered_set>
-#include <optional>
 
 using namespace std;
 
@@ -33,6 +32,7 @@ struct Node {
   }
 };
 typedef vector<Node> Nodes;
+typedef vector<vector<Node>> Paths;
 
 // For use in unordered set
 namespace std {
@@ -64,6 +64,31 @@ Graph readGraphFromFile(string const& fileName) {
   return graph;
 }
 
+Graph graphX5(Graph const& graph) {
+  Graph newGraph(graph);
+  // Create new rows and fill out the existing rows
+  for(size_t offset = 0; offset < 4; offset++) {
+    for(size_t y = 0; y < graph.size(); y++) {
+      newGraph.push_back(vector<Weight>());
+      for(size_t x = 0; x < graph[y].size(); x++) {
+        auto w = newGraph[y][x + (offset * graph[y].size())] + 1;
+        newGraph[y].push_back(w == 10 ? 1 : w);
+        newGraph.back().push_back(w == 10 ? 1 : w);
+      }
+    }
+  }
+  // Fill out the new rows
+  for(size_t y = graph.size(); y < newGraph.size(); y++) {
+    for(size_t offset = 0; offset < 4; offset++) {
+      for(size_t x = 0; x < graph[0].size(); x++) {
+        auto w = newGraph[y][x + (offset * graph[0].size())] + 1;
+        newGraph[y].push_back(w == 10 ? 1 : w);
+      }
+    }
+  }
+  return newGraph;
+}
+
 void printWeight(Weight w) {
   if(w == INF) {
     cout << "INF";
@@ -83,31 +108,105 @@ void printGraph(Graph const& graph) {
   cout << flush;
 }
 
+void printNode(Node const& n) {
+  cout << " \t" << n.X << ", " << n.Y << " ";
+}
+
+void printPath(Paths const& paths) {
+  vector<vector<string>> shortest(paths.size(), vector<string>(paths[0].size(), " "));
+
+  string botRight = "\u251B";
+  string topRight = "\u2513";
+  string topLeft = "\u250F";
+  string botLeft = "\u2517";
+  string horizontal = "\u2501";
+  string vertical = "\u2503";
+
+  Node current(paths[0].size() -1, paths.size() -1);
+  Node previous(-1, -1);
+  while(current.X != 0 || current.Y != 0) {
+    auto next = paths[current.Y][current.X];
+    if(previous.X == -1) {
+      if(next.X == current.X) {
+        shortest[current.Y][current.X] = vertical;
+      } else if(next.Y == current.Y) {
+        shortest[current.Y][current.X] = horizontal;
+      } else {
+        shortest[current.Y][current.X] = "O";
+      }
+    } else if(next.X < current.X) {
+      if(previous.Y < current.Y) {
+        shortest[current.Y][current.X] = botRight;
+      } else if(previous.Y > current.Y) {
+        shortest[current.Y][current.X] = topRight;
+      } else {
+        shortest[current.Y][current.X] = horizontal;
+      }
+    } else if(next.X > current.X) {
+      if(previous.Y < current.Y) {
+        shortest[current.Y][current.X] = botLeft;
+      } else if(previous.Y > current.Y) {
+        shortest[current.Y][current.X] = topLeft;
+      } else {
+        shortest[current.Y][current.X] = horizontal;
+      }
+    } else if(next.Y < current.Y) {
+      if(previous.X < current.X) {
+        shortest[current.Y][current.X] = botRight;
+      } else if(previous.X > current.X) {
+        shortest[current.Y][current.X] = botLeft;
+      } else {
+        shortest[current.Y][current.X] = vertical;
+      }
+    } else if(next.Y > current.Y) {
+      if(previous.X < current.X) {
+        shortest[current.Y][current.X] = topRight;
+      } else if(previous.X > current.X) {
+        shortest[current.Y][current.X] = topLeft;
+      } else {
+        shortest[current.Y][current.X] = vertical;
+      }
+    } else {
+      printNode(current);
+      printNode(next);
+      cout << endl;
+      throw "Not possible.";
+    }
+
+    previous = current;
+    current = next;
+  }
+
+  for(auto row : shortest) {
+    for(auto p : row) {
+      cout << p;
+    }
+    cout << endl;
+  }
+  cout << endl;
+}
+
 set<Node> getNeighbors(Node const& node, N const& XMAX, N const& YMAX) {
   set<Node> neighbors;
-  if(node.X+1 < XMAX) {
-    neighbors.insert(Node(node.X+1, node.Y));
-  }
-  if(node.Y+1 < YMAX) {
-    neighbors.insert(Node(node.X, node.Y+1));
-  }
-  if(node.X-1 >= 0) {
-    neighbors.insert(Node(node.X-1, node.Y));
-  }
-  if(node.Y-1 >= 0) {
-    neighbors.insert(Node(node.X, node.Y-1));
-  }
+  if(node.X+1 < XMAX) neighbors.insert(Node(node.X+1, node.Y));
+  if(node.Y+1 < YMAX) neighbors.insert(Node(node.X,   node.Y+1));
+  if(node.X-1 >= 0)   neighbors.insert(Node(node.X-1, node.Y));
+  if(node.Y-1 >= 0)   neighbors.insert(Node(node.X,   node.Y-1));
   return neighbors;
 }
 
-Graph distanceToEnd(Graph const& graph) {
-  // Initialize resulting distances to all nodes from source
+pair<Graph, Paths> allShortestPaths(Graph const& graph) {
+  // Initialize resulting distances and paths to all nodes from source
   Graph distances(graph);
-  for(size_t y = 0; y < distances.size(); y++)
+  Paths paths;
+  for(size_t y = 0; y < distances.size(); y++) {
+    paths.push_back(vector<Node>());
     for(size_t x = 0; x < distances.size(); x++) {
       distances[y][x] = INF;
+      // All path nodes refer to itself (no path)
+      paths[y].push_back(Node(x, y));
     }
-
+  }
   // Make a queue where we insert the next nodes to visit in order of shortness to them
   priority_queue<pair<Weight, Node>, vector<pair<Weight, Node>>, greater<pair<Weight, Node>>> tentative;
   // Push the initial node to visit (source)
@@ -142,26 +241,35 @@ Graph distanceToEnd(Graph const& graph) {
         distances[neighbor.Y][neighbor.X] = newDistanceToNeigbor;
         // Mark the neighbor as a node to visit again (so it can update its neighbors with the new distance)
         tentative.push(make_pair(newDistanceToNeigbor, neighbor));
-        // Do we not need to make it not visited as well?
+		// Set this node as the path node to reach the neighbor for its registered distance
+        paths[neighbor.Y][neighbor.X] = node;
       }
     }
   }
-  // Return all distances
-  return distances;
+  // Return all distances and paths
+  return make_pair(distances, paths);
 }
 
 int main() {
-  auto graph = readGraphFromFile("./input2.txt");
-  printGraph(graph);
+  auto smallGraph = readGraphFromFile("./input2.txt");
+  cout << "Input graph" << endl;
+  // printGraph(smallGraph);
+
+  // auto graph = smallGraph;
+  // Part 2 transform the graph to be five times bigger
+  auto graph = graphX5(smallGraph);
+  cout << "Graph X5" << endl;
+  // printGraph(graph);
   cout << '\n';
 
-  auto distances = distanceToEnd(graph);
+  cout << "Calculating all shortest paths" << endl;
+  auto distancesAndPaths = allShortestPaths(graph);
 
-  cout << "The resulting shortest distances to all nodes" << endl;
-  printGraph(distances);
+  cout << "The resulting shortest path from source to sink" << endl;
+  printPath(distancesAndPaths.second);
   cout << "Shortest path from source to sink: ";
-  printWeight(distances.back().back());
-  cout << '\n' << flush;
+  printWeight(distancesAndPaths.first.back().back());
+  cout << endl;
   return 0;
 }
 
