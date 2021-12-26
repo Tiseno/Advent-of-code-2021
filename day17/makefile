@@ -1,2 +1,2 @@
 default:
-	node main_1.js
+	node main_2.js
